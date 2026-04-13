@@ -87,7 +87,7 @@ ggsave("plots/2026-04-13_fig3-boxplot_gender-attitude-pitch.png", fig_3)
 ## Fit the Model
 
 ```{r}
-fit1 <- lmer(frequency ~ gender + attitude + (1 | subject), data = df_polite)
+fit1 <- lmer(frequency ~ gender + attitude + (1 | subject), data = df_polite, REML = FALSE)
 
 summary(fit1)
 # anova(fit1)
@@ -97,9 +97,9 @@ summary(fit1)
 ## Covariance Matrix for Y_i
 
 ```{r}
-vc <- VarCorr(fit1)
+vc1 <- VarCorr(fit1)
 
-tau2   <- as.numeric(vc$subject[1, 1])
+tau2   <- as.numeric(vc1$subject[1, 1])
 sigma2 <- sigma(fit1)^2
 
 V_i <- tau2 * matrix(1, 14, 14) + sigma2 * diag(14)
@@ -117,7 +117,7 @@ vcov(fit1)
 
 ```{r}
 ranef(fit1)$subject # random intercept
-coef(fit1)$subject # overall intercept + random intercept
+coef(fit1)$subject # fixed intercept + random intercept
 ```
 
 The BLUPs of the subject-specific random intercepts are the predicted random effects $\hat{b_i}$, obtained from `ranef(fit1)`. If one wants the full subject-specific intercepts, they are $\hat{\beta_0} + \hat{b_i}$, obtainable from `coef(fit1)`
@@ -127,6 +127,108 @@ The BLUPs of the subject-specific random intercepts are the predicted random eff
 ```{r}
 resid(fit1)
 ```
+
+
+# Question c
+
+## Fit the Model
+
+```{r}
+fit2 <- lmer(frequency ~ gender * attitude + (1 | subject), data = df_polite, REML = FALSE)
+summary(fit2)
+# anova(fit2)
+```
+
+
+## LRT
+
+```{r}
+anova(fit1, fit2)
+```
+
+
+We compared the model with main effects only and the model including the `gender $\times$ attitude` interaction using a likelihood ratio test. The test gave $\chi^2 = 1.3855$ with 1 degree of freedom and p = 0.2392 > 0.05. Since the p-value is greater than 0.05, there is no significant evidence that the interaction term is associated with pitch. Therefore, the simpler model without the interaction term is preferred.  
+
+
+# Question d
+
+The model is $$Y_{ijk} = \beta_0 + \beta_1 gender_i + \beta_2 attitude_{ijk} + b_i + c_j + \epsilon_{ijk}$$.  
+$b_i$ is the random intercept of `subject`, $c_j$ is the random intercept of `scenario` and $\epsilon_{ijk}$ is the residual error. We assume that $b_i \sim N(0, \tau_{sub}^2)$, $c_j \sim N(0, \tau_{scen}^2)$, $\epsilon_{ijk} \sim N(0, \sigma^2)$ and these three terms are mutually independent.  
+
+
+## Fit the Model
+
+```{r}
+fit3 <- lme4::lmer(frequency ~ gender + attitude + (1 | subject) + (1 | scenario), data = df_polite, REML = FALSE)
+summary(fit3)
+# anova(fit3)
+```
+
+
+
+## Covariance Matrix
+
+```{r}
+# extract variance components
+vc3 <- VarCorr(fit3)
+
+tau_subj2 <- as.numeric(vc3$subject[1, 1])   
+tau_scen2 <- as.numeric(vc3$scenario[1, 1])  
+sigma2    <- sigma(fit3)^2  
+```
+
+
+```{r}
+# choose one subject
+subj_id <- levels(df_polite$subject)[1]
+df_i <- subset(df_polite, subject == subj_id)
+df_i <- df_i[order(df_i$scenario, df_i$attitude), ]
+```
+
+
+```{r}
+# build matrices
+n_i <- nrow(df_i)
+J <- matrix(1, n_i, n_i)
+A <- outer(df_i$scenario, df_i$scenario, "==") * 1
+I <- diag(n_i)
+```
+
+
+```{r}
+V_i <- tau_subj2 * J + tau_scen2 * A + sigma2 * I
+
+V_i
+```
+
+
+* Under this model, the covariance matrix for $Y_i$ is the same across subjects, provided that each subject has the same number of observations and the same scenario structure. This is because the variance components $\tau_{sub}^2$, $\tau_{scen}^2$ and $\sigma^2$ are common to all subjects, and the indicator matrix for scenario membership is the same for each subject.  
+
+* For a fixed subject i, there are 14 observations in total, corresponding to 7 scenarios and 2 attitude conditions within each scenario. Let $Y_i$ denote the $14 \times 1$ response vector for subject i. Then the covariance matrix for $Y_i$ is $$Var(Y_i) = \tau_{sub}^2 J + \tau_{scen}^2 A_i + \sigma^2 I$$ where J is a $14 \times 14$ matrix of ones, I is a $14 \times 14$ identity matrix and $A_i$ is the indicator matrix with entry 1 if two observations belong to the same scenario and 0 otherwise.   
+
+* More specifically, the covariance structure is: $$Var(Y_{ijk}) = \tau_{sub}^2 + \tau_{scen}^2 + \sigma^2$$ $Cov(Y_{ijk}, Y_{ijb}) = \tau_{sub}^2 + \tau_{scen}^2$ if the subject and scenario are the same but attitude differs, $Cov(Y_{ijk}, Y_{iak}) = \tau_{sub}^2$ if the subject is the same but the scenario differs, and $Cov(Y_{ijk}, Y_{iab}) = \tau_{sub}^2$ if both scenario and attitude differ but the subject is the same.  
+
+* Thus, within the same subject, observations from the same scenario are more strongly correlated because they share both the subject effect and the scenario effect, whereas observations from different scenarios share only the subject effect.  
+
+
+## Interpretation
+
+
+The coefficient for the fixed effect term `attitude` represents the average difference in pitch between the polite (`pol`) and informal (`inf`) conditions, after adjusting for gender and accounting for random intercept variation across subjects and scenarios. In this model, the estimated coefficient is -20.002, which means that, on average, the pitch in the polite condition is about 20 units lower than in the informal condition, holding gender constant.  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
