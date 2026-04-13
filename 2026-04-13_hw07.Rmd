@@ -1,0 +1,96 @@
+---
+title: "2026-04-13_hw07"
+author: "Chris"
+date: "2026-04-13"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: cosmo
+    css: style.css
+---
+
+
+# Read the Data
+
+```{r message=FALSE}
+library(tidyverse)
+
+df_polite <- read_csv("data/HW7_politeness_data.csv") |>
+  janitor::clean_names() |>
+  mutate(
+    gender = factor(gender),
+    subject = factor(subject),
+    scenario = factor(scenario),
+    attitude = factor(attitude, levels = c("inf", "pol")),
+    frequency = as.numeric(frequency)
+  )
+```
+
+
+# Question a
+
+## Gender & Pitch
+
+```{r}
+fig_1 <- df_polite |>
+  ggplot(aes(x = gender, y = frequency)) + geom_boxplot(aes(fill = gender)) +
+  labs(
+    x = "Gender",
+    y = "Pitch",
+    title = "Pitch by Gender"
+  ) + theme_minimal()
+
+fig_1
+ggsave("plots/2026-04-13_fig1-boxplot_gender-pitch.png", fig_1)
+```
+
+
+## Attitude & Pitch
+
+```{r}
+fig_2 <- df_polite |>
+  ggplot(aes(x = attitude, y = frequency)) + geom_boxplot(aes(fill = attitude)) +
+  labs(
+    x = "Attitude",
+    y = "Pitch",
+    title = "Pitch by Attitude"
+  ) + theme_minimal()
+
+fig_2
+ggsave("plots/2026-04-13_fig2-boxplot_attitude-pitch.png", fig_2)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
