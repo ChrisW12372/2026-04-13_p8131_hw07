@@ -16,6 +16,7 @@ output:
 
 ```{r message=FALSE}
 library(tidyverse)
+library(lmerTest)
 
 df_polite <- read_csv("data/HW7_politeness_data.csv") |>
   janitor::clean_names() |>
@@ -81,12 +82,51 @@ ggsave("plots/2026-04-13_fig3-boxplot_gender-attitude-pitch.png", fig_3)
 ```
 
 
+# Question b
+
+## Fit the Model
+
+```{r}
+fit1 <- lmer(frequency ~ gender + attitude + (1 | subject), data = df_polite)
+
+summary(fit1)
+# anova(fit1)
+```
 
 
+## Covariance Matrix for Y_i
+
+```{r}
+vc <- VarCorr(fit1)
+
+tau2   <- as.numeric(vc$subject[1, 1])
+sigma2 <- sigma(fit1)^2
+
+V_i <- tau2 * matrix(1, 14, 14) + sigma2 * diag(14)
+V_i
+```
+
+## Covariance Matrix for Fixed Effects
+
+```{r}
+vcov(fit1)
+```
 
 
+## Subject-Specific Intercepts
 
+```{r}
+ranef(fit1)$subject # random intercept
+coef(fit1)$subject # overall intercept + random intercept
+```
 
+The BLUPs of the subject-specific random intercepts are the predicted random effects $\hat{b_i}$, obtained from `ranef(fit1)`. If one wants the full subject-specific intercepts, they are $\hat{\beta_0} + \hat{b_i}$, obtainable from `coef(fit1)`
+
+## Residuals
+
+```{r}
+resid(fit1)
+```
 
 
 
