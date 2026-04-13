@@ -20,7 +20,7 @@ library(tidyverse)
 df_polite <- read_csv("data/HW7_politeness_data.csv") |>
   janitor::clean_names() |>
   mutate(
-    gender = factor(gender),
+    gender = factor(gender, levels = c("M", "F")),
     subject = factor(subject),
     scenario = factor(scenario),
     attitude = factor(attitude, levels = c("inf", "pol")),
@@ -65,6 +65,20 @@ ggsave("plots/2026-04-13_fig2-boxplot_attitude-pitch.png", fig_2)
 
 
 
+## Pitch by Gender & Attitude
+
+```{r}
+fig_3 <- df_polite |>
+  ggplot(aes(x = attitude, y = frequency, fill = gender)) + geom_boxplot() +
+  labs(
+    x = "Attitude",
+    y = "Pitch",
+    title = "Pitch by Gender and Attitude"
+  ) + theme_minimal()
+
+fig_3
+ggsave("plots/2026-04-13_fig3-boxplot_gender-attitude-pitch.png", fig_3)
+```
 
 
 
