@@ -1653,6 +1653,44 @@ V_i</code></pre>
 ## [12,]  379.3897  379.3897  379.3897  379.3897 1216.2266  379.3897  379.3897
 ## [13,]  379.3897  379.3897  379.3897  379.3897  379.3897 1216.2266  379.3897
 ## [14,]  379.3897  379.3897  379.3897  379.3897  379.3897  379.3897 1216.2266</code></pre>
+<p>We fit the random-intercept mixed-effects model <span class="math display">\[
+Y_{ij} = \beta_0 + \beta_1 \,\text{gender}_i + \beta_2
+\,\text{attitude}_{ij} + b_i + \varepsilon_{ij},
+\]</span> where <span class="math display">\[
+b_i \sim N(0,\tau^2), \qquad \varepsilon_{ij} \sim N(0,\sigma^2),
+\]</span> and <span class="math inline">\(b_i\)</span> and <span class="math inline">\(\varepsilon_{ij}\)</span> are independent.</p>
+<p>For subject <span class="math inline">\(i\)</span>, let <span class="math display">\[
+Y_i = (Y_{i1}, Y_{i2}, \dots, Y_{i n_i})^T.
+\]</span> Then the model can be written in matrix form as <span class="math display">\[
+Y_i = X_i \beta + Z_i b_i + \varepsilon_i,
+\]</span> where <span class="math inline">\(Z_i =
+\mathbf{1}_{n_i}\)</span> for the random-intercept model. Therefore,
+<span class="math display">\[
+\mathrm{Var}(Y_i) = Z_i \,\mathrm{Var}(b_i)\, Z_i^T +
+\mathrm{Var}(\varepsilon_i)
+= \tau^2 J_{n_i} + \sigma^2 I_{n_i}.
+\]</span></p>
+<p>Since each subject has 14 observations in this dataset, <span class="math display">\[
+\mathrm{Var}(Y_i) = \tau^2 J_{14} + \sigma^2 I_{14}.
+\]</span></p>
+<p>Equivalently, the diagonal entries are <span class="math display">\[
+\mathrm{Var}(Y_{ij}) = \tau^2 + \sigma^2,
+\]</span> and for <span class="math inline">\(j \neq k\)</span>, the
+off-diagonal entries are <span class="math display">\[
+\mathrm{Cov}(Y_{ij}, Y_{ik}) = \tau^2.
+\]</span></p>
+<p>The covariance matrix for the estimates of the fixed effects is <span class="math display">\[
+\mathrm{Var}(\hat{\beta}) = (X^T V^{-1} X)^{-1},
+\]</span> which is a <span class="math inline">\(3 \times 3\)</span>
+matrix corresponding to the intercept, gender, and attitude effects.</p>
+<p>The BLUPs for the subject-specific random intercepts are the
+predicted random effects <span class="math display">\[
+\hat{b}_i = \hat{D} Z_i^T \hat{V}_i^{-1} (Y_i - X_i \hat{\beta}),
+\]</span> which can be obtained in R using .</p>
+<p>The conditional residuals are <span class="math display">\[
+\hat{e}_{ij} = Y_{ij} - \hat{\beta}_0 - \hat{\beta}_1 \,\text{gender}_i
+- \hat{\beta}_2 \,\text{attitude}_{ij} - \hat{b}_i.
+\]</span></p>
 </div>
 <div id="covariance-matrix-for-fixed-effects" class="section level2" number="3.3">
 <h2><span class="header-section-number">3.3</span> Covariance Matrix for

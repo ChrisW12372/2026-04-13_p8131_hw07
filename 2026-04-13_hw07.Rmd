@@ -108,6 +108,61 @@ V_i <- tau2 * matrix(1, 14, 14) + sigma2 * diag(14)
 V_i
 ```
 
+We fit the random-intercept mixed-effects model
+\[
+Y_{ij} = \beta_0 + \beta_1 \,\text{gender}_i + \beta_2 \,\text{attitude}_{ij} + b_i + \varepsilon_{ij},
+\]
+where
+\[
+b_i \sim N(0,\tau^2), \qquad \varepsilon_{ij} \sim N(0,\sigma^2),
+\]
+and \(b_i\) and \(\varepsilon_{ij}\) are independent.
+
+For subject \(i\), let
+\[
+Y_i = (Y_{i1}, Y_{i2}, \dots, Y_{i n_i})^T.
+\]
+Then the model can be written in matrix form as
+\[
+Y_i = X_i \beta + Z_i b_i + \varepsilon_i,
+\]
+where \(Z_i = \mathbf{1}_{n_i}\) for the random-intercept model. Therefore,
+\[
+\mathrm{Var}(Y_i) = Z_i \,\mathrm{Var}(b_i)\, Z_i^T + \mathrm{Var}(\varepsilon_i)
+= \tau^2 J_{n_i} + \sigma^2 I_{n_i}.
+\]
+
+Since each subject has 14 observations in this dataset,
+\[
+\mathrm{Var}(Y_i) = \tau^2 J_{14} + \sigma^2 I_{14}.
+\]
+
+Equivalently, the diagonal entries are
+\[
+\mathrm{Var}(Y_{ij}) = \tau^2 + \sigma^2,
+\]
+and for \(j \neq k\), the off-diagonal entries are
+\[
+\mathrm{Cov}(Y_{ij}, Y_{ik}) = \tau^2.
+\]
+
+The covariance matrix for the estimates of the fixed effects is
+\[
+\mathrm{Var}(\hat{\beta}) = (X^T V^{-1} X)^{-1},
+\]
+which is a \(3 \times 3\) matrix corresponding to the intercept, gender, and attitude effects.
+
+The BLUPs for the subject-specific random intercepts are the predicted random effects
+\[
+\hat{b}_i = \hat{D} Z_i^T \hat{V}_i^{-1} (Y_i - X_i \hat{\beta}),
+\]
+which can be obtained in R using \texttt{ranef(fit)\$subject}.
+
+The conditional residuals are
+\[
+\hat{e}_{ij} = Y_{ij} - \hat{\beta}_0 - \hat{\beta}_1 \,\text{gender}_i - \hat{\beta}_2 \,\text{attitude}_{ij} - \hat{b}_i.
+\]
+
 ## Covariance Matrix for Fixed Effects
 
 ```{r}
