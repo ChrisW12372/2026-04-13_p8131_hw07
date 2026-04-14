@@ -81,6 +81,8 @@ fig_3
 ggsave("plots/2026-04-13_fig3-boxplot_gender-attitude-pitch.png", fig_3)
 ```
 
+Based on the data and the combined plot, females have higher median frequency than males, regardless of attitude. Within males, the informal group also has a higher median than the formal group.  
+
 
 # Question b
 
